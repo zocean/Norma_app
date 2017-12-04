@@ -1,7 +1,7 @@
 #!/home/yangz6/Software/Python-2.7.5/python-2.7.5
 # Programmer : Yang Zhang 
 # Contact: yzhan116@illinois.edu
-# Last-modified: 04 Dec 2017 00:07:59
+# Last-modified: 04 Dec 2017 00:30:20
 
 import os,sys,argparse
 
@@ -25,6 +25,8 @@ class Gene(object):
         self.start = None
         self.stop = None
         self.strand = None
+    def __repr__(self):
+        return "%s\t%d\t%d\t%s\t.\t%s" % (self.chrom, self.start, self.stop, self.gene_id, self.strand)
     def update_pos(self, chrom, start, stop, strand):
         self.chrom = chrom
         self.start = start
@@ -120,7 +122,7 @@ def get_non_hk_gene(hk_gene_table, refgene_list):
         if gene.chrom is not None:
             hk_gene_list.append(gene)
     # get non-hk_gene_list
-    non_hk_gene_list = sorted(non_hk_gene_table.keys())
+    non_hk_gene_list = sorted(non_hk_gene_table.values())
     # log
     print >>sys.stderr, "%d housekeeping genes are selected from %d raw housekeeping genes." % (len(hk_gene_list), len(hk_gene_table))
     print >>sys.stderr, "%d non-housekeeping genes are selected from %d refSeq gene. %d refgene are skipped because of same gene_id as hk genes. %d refgene are skipped because of same gene_name as hk genes." % (len(non_hk_gene_list), len(refgene_list), MATCH_id, MATCH_name)
@@ -144,6 +146,11 @@ def main():
         for gene in non_hk_gene_list:
             print >>fout, gene
     fout.close()
+    # sort bed
+    os.system("sort -k1,1 -k2,2n %s >%s" % (args.output + '_hk.bed', args.output + '_hk.bed.sort'))
+    os.system("mv %s %s" % (args.output + '_hk.bed.sort', args.output + '_hk.bed'))
+    os.system("sort -k1,1 -k2,2n %s >%s" % (args.output + '_non_hk.bed', args.output + '_non_hk.bed.sort'))
+    os.system("mv %s %s" % (args.output + '_non_hk.bed.sort', args.output + '_non_hk.bed'))
  
 if __name__=="__main__":
     main()
